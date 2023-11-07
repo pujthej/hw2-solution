@@ -17,6 +17,8 @@ import model.ExpenseTrackerModel;
 import model.Transaction;
 import model.Filter.AmountFilter;
 import view.ExpenseTrackerView;
+import model.Filter.CategoryFilter;
+
 
 
 public class TestExample {
@@ -198,6 +200,41 @@ public class TestExample {
             assertEquals("Filtered transaction should match the filter amount.", filterAmount, transaction.getAmount(), 0.01);
         }
     }
+
+    @Test
+    public void testFilterByCategory() {
+        // Pre-condition: Ensure the transaction list is initially empty
+        assertEquals("The transaction list should be empty before adding transactions.", 0, model.getTransactions().size());
+    
+        // Action: Add multiple transactions with different categories
+        controller.addTransaction(50.0, "food");
+        controller.addTransaction(75.0, "utilities");
+        controller.addTransaction(100.0, "entertainment");
+        controller.addTransaction(25.0, "food");
+    
+        // Set the filter to the controller with the specified category
+        String filterCategory = "food";
+        controller.setFilter(new CategoryFilter(filterCategory));
+    
+        // Apply the filter
+        controller.applyFilter();
+    
+        // Retrieve the filtered transactions after filter application
+        List<Transaction> allTransactions = model.getTransactions();
+        List<Transaction> filteredTransactions = new ArrayList<>();
+        for (Transaction t : allTransactions) {
+            if (t.getCategory().equalsIgnoreCase(filterCategory)) {
+                filteredTransactions.add(t);
+            }
+        }
+    
+        // Verify: Check if the filtered transactions list contains only the transactions with the specified category
+        assertEquals("The filtered transactions list should contain only transactions matching the filter category.", 2, filteredTransactions.size());
+        for (Transaction transaction : filteredTransactions) {
+            assertEquals("Filtered transaction should match the filter category.", filterCategory.toLowerCase(), transaction.getCategory().toLowerCase());
+        }
+    }
+    
 
 
     
