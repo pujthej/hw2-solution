@@ -1,5 +1,6 @@
 // package test;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -138,5 +139,31 @@ public class TestExample {
     double totalCost = getTotalCost();
     assertEquals("The total cost should be updated to reflect the added transaction amount.", amount, totalCost, 0.01);
   }
+
+  @Test
+  public void testInvalidInputHandling() {
+    // Pre-condition: Ensure the transaction list is initially empty
+    assertEquals("The transaction list should be empty before attempting to add an invalid transaction.", 0, model.getTransactions().size());
+
+    // Save the initial total cost
+    double initialTotalCost = getTotalCost();
+
+    // Action: Attempt to add a transaction with an invalid amount (e.g., -50.0) and invalid category (e.g., "")
+    double invalidAmount = -50.0; // Negative amount to represent an invalid case
+    String invalidCategory = ""; // Empty string to represent an invalid case
+    boolean addTransactionResult = controller.addTransaction(invalidAmount, invalidCategory);
+
+    // Verify: Adding transaction should fail
+    assertFalse("Adding an invalid transaction should fail.", addTransactionResult);
+
+    // Post-condition: Verify the transaction list is still empty
+    List<Transaction> transactions = model.getTransactions();
+    assertEquals("The transaction list should remain empty after attempting to add an invalid transaction.", 0, transactions.size());
+
+    // Verify: Total cost should remain unchanged
+    double totalCostAfterAttempt = getTotalCost();
+    assertEquals("The total cost should remain unchanged after attempting to add an invalid transaction.", initialTotalCost, totalCostAfterAttempt, 0.01);
+}
+
     
 }
