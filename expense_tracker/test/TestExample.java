@@ -112,5 +112,31 @@ public class TestExample {
         double totalCost = getTotalCost();
         assertEquals(0.00, totalCost, 0.01);
     }
+
+    @Test
+  public void testAddFoodTransaction() {
+    // Pre-condition: Ensure the transaction list is initially empty
+    assertEquals("The transaction list should be empty before adding a new transaction.", 0, model.getTransactions().size());
+
+    // Action: Add a transaction with amount 50.00 and category "food"
+    double amount = 50.0;
+    String category = "food";
+    boolean addTransactionResult = controller.addTransaction(amount, category);
+
+    // Verify: Check if the transaction was added successfully
+    assertTrue("The transaction should be added successfully.", addTransactionResult);
+
+    // Post-condition: The transaction list should contain the new transaction
+    List<Transaction> transactions = model.getTransactions();
+    assertEquals("The transaction list should contain one transaction after adding.", 1, transactions.size());
+
+    // Verify: The transaction details are correct
+    Transaction transaction = transactions.get(0);
+    checkTransaction(amount, category, transaction);
+
+    // Verify: The total cost is updated correctly
+    double totalCost = getTotalCost();
+    assertEquals("The total cost should be updated to reflect the added transaction amount.", amount, totalCost, 0.01);
+  }
     
 }
