@@ -234,6 +234,21 @@ public class TestExample {
             assertEquals("Filtered transaction should match the filter category.", filterCategory.toLowerCase(), transaction.getCategory().toLowerCase());
         }
     }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testUndoDisallowedOnEmptyList() {
+        // Pre-condition: Ensure the transaction list is initially empty
+        assertEquals("The transaction list should be empty before attempting to undo.", 0, model.getTransactions().size());
+
+    
+        // Action: Attempt to undo when the transaction list is empty
+        // We'll simulate this by calling removeTransaction with an empty index array
+        controller.removeTransaction(new int[] {});
+    
+        // Expected Output: An IllegalArgumentException should be thrown
+        // The expected exception is specified in the @Test annotation
+    }
+    
     
 
 
