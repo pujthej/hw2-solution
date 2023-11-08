@@ -3,6 +3,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -13,6 +14,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import controller.ExpenseTrackerController;
+import controller.InputValidation;
 import model.ExpenseTrackerModel;
 import model.Transaction;
 import model.Filter.AmountFilter;
@@ -248,8 +250,40 @@ public class TestExample {
         // Expected Output: An IllegalArgumentException should be thrown
         // The expected exception is specified in the @Test annotation
     }
+    @Test
+    public void testUndoTransaction() {
+        // Setup: Add a transaction
+        double amount = 25.0;
+        String category = "entertainment";
+        boolean transactionAdded = controller.addTransaction(amount, category);
+        assertTrue("Transaction should be added before it can be undone", transactionAdded);
+    
+        // Ensure there is a transaction to remove
+        assertEquals(1, model.getTransactions().size());
+    
+        // Execution Steps: Get the index of the last transaction added and Undo the transaction addition
+        int lastIndex = model.getTransactions().size() - 1;
+        controller.removeTransaction(new int[] {lastIndex});
+        
+        // Assertions: Check that the transaction is removed and total cost is updated
+        assertEquals(0, model.getTransactions().size());
+        assertEquals(0.00, getTotalCost(), 0.01);
+    }
+    
+
     
     
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+
 
 
     
