@@ -72,8 +72,8 @@ public class TestExample {
         assertEquals(0, model.getTransactions().size());
     
         // Perform the action: Add a transaction
-	double amount = 50.0;
-	String category = "food";
+	    double amount = 50.0;
+	    String category = "food";
         assertTrue(controller.addTransaction(amount, category));
     
         // Post-condition: List of transactions contains only
@@ -174,32 +174,27 @@ public class TestExample {
     public void testFilterByAmount() {
     // Pre-condition: Ensure the transaction list is initially empty
         assertEquals("The transaction list should be empty before adding transactions.", 0, model.getTransactions().size());
-
-    // Action: Add multiple transactions with different amounts
-        controller.addTransaction(50.0, "food");
-        controller.addTransaction(75.0, "utilities");
-        controller.addTransaction(50.0, "entertainment");
-
-    // Set the filter to the controller with the specified amount
         double filterAmount = 50.0;
-        controller.setFilter(new AmountFilter(filterAmount));
+        // Add Transactions
+        model.addTransaction(new Transaction(100.0, "food"));
+        model.addTransaction(new Transaction(filterAmount,"food"));
+        model.addTransaction(new Transaction(200.0, "entertainment"));
+        model.addTransaction(new Transaction(filterAmount,"entertainment"));
+        model.addTransaction(new Transaction(50.0,"bills"));
 
-    // Apply the filter
-        controller.applyFilter();
+        // Create an AmountFilter
+        AmountFilter amtFilter = new AmountFilter(50.0);
 
-    // Retrieve the filtered transactions after filter application
-        List<Transaction> allTransactions = model.getTransactions();
-        List<Transaction> filteredTransactions = new ArrayList<>();
-        for (Transaction t : allTransactions) {
-            if (t.getAmount() == filterAmount) {
-                filteredTransactions.add(t);
-            }
-        }
+        // Apply the filter to list of transactions
+        List<Transaction> filteredTransactions = amtFilter.filter(model.getTransactions());
 
-    // Verify: Check if the filtered transactions list contains only the transactions with the specified amount
-        assertEquals("The filtered transactions list should contain only transactions matching the filter amount.", 2, filteredTransactions.size());
+        // Post conditions: Assert that the filtered list only contains transactions with the amount = amountToFilter
+        assertNotNull("Filtered transactions list should not be null", filteredTransactions);
+        assertEquals("There should be three transactions with the amount equal to 50.0", 3, filteredTransactions.size());
+
+        // Verify that all transactions in the filtered list have the amount equal to 50.0
         for (Transaction transaction : filteredTransactions) {
-            assertEquals("Filtered transaction should match the filter amount.", filterAmount, transaction.getAmount(), 0.01);
+            assertEquals("The filtered transaction should have amount equal to 50.0", filterAmount, transaction.getAmount(), 0.01);
         }
     }
 
@@ -207,33 +202,30 @@ public class TestExample {
     public void testFilterByCategory() {
         // Pre-condition: Ensure the transaction list is initially empty
         assertEquals("The transaction list should be empty before adding transactions.", 0, model.getTransactions().size());
-    
-        // Action: Add multiple transactions with different categories
-        controller.addTransaction(50.0, "food");
-        controller.addTransaction(75.0, "utilities");
-        controller.addTransaction(100.0, "entertainment");
-        controller.addTransaction(25.0, "food");
-    
-        // Set the filter to the controller with the specified category
         String filterCategory = "food";
-        controller.setFilter(new CategoryFilter(filterCategory));
-    
-        // Apply the filter
-        controller.applyFilter();
-    
-        // Retrieve the filtered transactions after filter application
-        List<Transaction> allTransactions = model.getTransactions();
-        List<Transaction> filteredTransactions = new ArrayList<>();
-        for (Transaction t : allTransactions) {
-            if (t.getCategory().equalsIgnoreCase(filterCategory)) {
-                filteredTransactions.add(t);
-            }
-        }
-    
-        // Verify: Check if the filtered transactions list contains only the transactions with the specified category
-        assertEquals("The filtered transactions list should contain only transactions matching the filter category.", 2, filteredTransactions.size());
+        // Add Transactions
+        model.addTransaction(new Transaction(100.0, "food"));
+        model.addTransaction(new Transaction(100.0,filterCategory));
+        model.addTransaction(new Transaction(200.0, "entertainment"));
+
+        // Create a categoryFilter
+        CategoryFilter catFilter = new CategoryFilter("food");
+
+        // Print debug information
+        System.out.println("All Transactions: " + model.getTransactions());
+
+        // Apply the filter to list of transactions
+        List<Transaction> filteredTransactions = catFilter.filter(model.getTransactions());
+
+        // Post conditions: Assert that the filtered list only contains transactions with the category = food
+        assertNotNull("Filtered transactions list should not be null", filteredTransactions);
+        // Print debug information
+        System.out.println("Number of filtered transactions: " + filteredTransactions.size());
+        assertEquals("There should be two transactions with the category equal to food", 2, filteredTransactions.size());
+
+        // Verify that all transactions in the filtered list have food as category
         for (Transaction transaction : filteredTransactions) {
-            assertEquals("Filtered transaction should match the filter category.", filterCategory.toLowerCase(), transaction.getCategory().toLowerCase());
+            assertEquals("The filtered transaction should have category equal to food", filterCategory, transaction.getCategory());
         }
     }
 
