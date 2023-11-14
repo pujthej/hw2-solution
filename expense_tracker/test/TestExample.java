@@ -8,6 +8,9 @@ import static org.junit.Assert.fail;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import javax.swing.table.DefaultTableModel;
+
 import java.text.ParseException;
 
 import org.junit.Before;
@@ -172,27 +175,27 @@ public class TestExample {
     }
     @Test
     public void testFilterByAmount() {
-    // Pre-condition: Ensure the transaction list is initially empty
+        // Ensure the transaction list is empty initially
         assertEquals("The transaction list should be empty before adding transactions.", 0, model.getTransactions().size());
+        // Set the amount to filter
         double filterAmount = 50.0;
-        // Add Transactions
+        // Add various transactions to the model
         model.addTransaction(new Transaction(100.0, "food"));
         model.addTransaction(new Transaction(filterAmount,"food"));
         model.addTransaction(new Transaction(200.0, "entertainment"));
         model.addTransaction(new Transaction(filterAmount,"entertainment"));
         model.addTransaction(new Transaction(50.0,"bills"));
-
-        // Create an AmountFilter
+        // Create an AmountFilter instance
         AmountFilter amtFilter = new AmountFilter(50.0);
 
         // Apply the filter to list of transactions
         List<Transaction> filteredTransactions = amtFilter.filter(model.getTransactions());
 
-        // Post conditions: Assert that the filtered list only contains transactions with the amount = amountToFilter
+        // Verify that the filtered list contains the expected number of transactions with the specified amount
         assertNotNull("Filtered transactions list should not be null", filteredTransactions);
         assertEquals("There should be three transactions with the amount equal to 50.0", 3, filteredTransactions.size());
 
-        // Verify that all transactions in the filtered list have the amount equal to 50.0
+        // Check each transaction in the filtered list to ensure it has the expected amount (with a tolerance of 0.01)
         for (Transaction transaction : filteredTransactions) {
             assertEquals("The filtered transaction should have amount equal to 50.0", filterAmount, transaction.getAmount(), 0.01);
         }
@@ -200,10 +203,11 @@ public class TestExample {
 
     @Test
     public void testFilterByCategory() {
-        // Pre-condition: Ensure the transaction list is initially empty
+        /// Ensure the transaction list is empty initially
         assertEquals("The transaction list should be empty before adding transactions.", 0, model.getTransactions().size());
+        // Set the category to filter
         String filterCategory = "food";
-        // Add Transactions
+        // Add various transactions to the model
         model.addTransaction(new Transaction(100.0, "food"));
         model.addTransaction(new Transaction(100.0,filterCategory));
         model.addTransaction(new Transaction(200.0, "entertainment"));
@@ -217,69 +221,69 @@ public class TestExample {
         // Apply the filter to list of transactions
         List<Transaction> filteredTransactions = catFilter.filter(model.getTransactions());
 
-        // Post conditions: Assert that the filtered list only contains transactions with the category = food
+        // Verify that the filtered list contains the expected number of transactions with the specified category
         assertNotNull("Filtered transactions list should not be null", filteredTransactions);
         // Print debug information
         System.out.println("Number of filtered transactions: " + filteredTransactions.size());
         assertEquals("There should be two transactions with the category equal to food", 2, filteredTransactions.size());
 
-        // Verify that all transactions in the filtered list have food as category
+        // Check each transaction in the filtered list to ensure it has the expected category
         for (Transaction transaction : filteredTransactions) {
             assertEquals("The filtered transaction should have category equal to food", filterCategory, transaction.getCategory());
         }
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testUndoDisallowedOnEmptyList() {
-        // Pre-condition: Ensure the transaction list is initially empty
-        assertEquals("The transaction list should be empty before attempting to undo.", 0, model.getTransactions().size());
-
-    
-        // Action: Attempt to undo when the transaction list is empty
-        // We'll simulate this by calling removeTransaction with an empty index array
-        controller.removeTransaction(new int[] {});
-    
-        // Expected Output: An IllegalArgumentException should be thrown
-        // The expected exception is specified in the @Test annotation
-    }
     @Test
-    public void testUndoTransaction() {
-        // Setup: Add a transaction
-        double amount = 25.0;
-        String category = "entertainment";
-        boolean transactionAdded = controller.addTransaction(amount, category);
-        assertTrue("Transaction should be added before it can be undone", transactionAdded);
-    
-        // Ensure there is a transaction to remove
-        assertEquals(1, model.getTransactions().size());
-    
-        // Execution Steps: Get the index of the last transaction added and Undo the transaction addition
-        int lastIndex = model.getTransactions().size() - 1;
-        controller.removeTransaction(new int[] {lastIndex});
-        
-        // Assertions: Check that the transaction is removed and total cost is updated
-        assertEquals(0, model.getTransactions().size());
-        assertEquals(0.00, getTotalCost(), 0.01);
-    }
-    
+    public void testUndoDisallowed() {
+        // Pre-condition: List of transactions is empty
+        assertEquals("The list of transactions should be empty before attempting to undo.", 0, model.getTransactions().size());
+        // Pre-condition: Ensure the table model in the view is initially empty
+        DefaultTableModel tableModel = view.getTableModel();
+        assertEquals("The table model should be empty before attempting to undo.", 0, tableModel.getRowCount());
+        // Perform the action: Try to undo and expect an exception with the message "Undo Disallowed."
+        // Perform the action: Try to undo and expect an exception with the message "No row is selected."
+        try {
+            controller.removeTransaction(new int[0]);
+            // If no exception is thrown, fail the test with a message
+            fail("Expected an exception, but none was thrown.");
+        } catch (Exception e) {
+            // Check the exception type and message
+            assertEquals(IllegalArgumentException.class, e.getClass());
+            assertEquals("No row is selected", e.getMessage());
+        }
 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+    // Post-condition: Ensure the list of transactions is still empty
+    assertEquals("The list of transactions should remain empty after attempting to undo.", 0, model.getTransactions().size());
 
+    // Post-condition: Ensure the table model in the view is still empty
+    assertEquals("The table model should remain empty after attempting to undo.", 0, tableModel.getRowCount());
+}
+@Test
+public void testUndoAllowed() {
+    // Pre-condition: Ensure the list of transactions is initially empty in the model
+    assertEquals("The list of transactions should be empty before performing the undo test.", 0, model.getTransactions().size());
 
+    // Pre-condition: Ensure the table model in the view is initially empty
+    DefaultTableModel tableModel = view.getTableModel();
+    assertEquals("The table model should be empty before performing the undo test.", 0, tableModel.getRowCount());
 
+    // Action: Add transactions to the model
+    controller.addTransaction(50.0, "food");
+    controller.addTransaction(50.0, "travel");
 
-    
+    // Validation: Check the total cost in the model before performing the undo
+    assertEquals("Total cost in the model before performing the undo should be 100.0.", 100.0, getTotalCost(), 0.01);
 
+    // Action: Perform the undo operation
+    controller.removeTransaction(new int[]{0});
 
-    
+    // Post-condition: Ensure the list of transactions in the model is now 1
+    assertEquals("The list of transactions in the model should be 1 after performing the undo.", 1, model.getTransactions().size());
+
+    // Validation: Check the total cost in the model after performing the undo
+    assertEquals("Total cost in the model after performing the undo should be 50.0.", 50.0, getTotalCost(), 0.01);
+
+    // Validation: Check if the view is updated
+    assertEquals("The table model in the view should have 2 rows after performing the undo.", 2, tableModel.getRowCount());
+}
 }

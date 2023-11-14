@@ -75,7 +75,7 @@ public class ExpenseTrackerController {
   public boolean removeTransaction(int[] row) {
     if (row.length < 1 || row[0] >= model.getTransactions().size()) {
       JOptionPane.showMessageDialog(view, "No row is selected");
-      throw new IllegalArgumentException();
+      throw new IllegalArgumentException("No row is selected");
     } else {
       Transaction transac = model.getTransactions().get(row[0]);
       model.removeTransaction(transac);
